@@ -1,3 +1,10 @@
+//dotnet add package Swashbuckle.AspNetCore
+//dotnet add package Microsoft.OpenApi
+//dotnet add package Microsoft.OpenApi --version 1.6.22
+//dotnet clean
+//dotnet build
+//dotnet run --launch-profile "https"
+
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
