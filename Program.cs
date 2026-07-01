@@ -1,15 +1,9 @@
-//dotnet add package Swashbuckle.AspNetCore
-//dotnet add package Microsoft.OpenApi
-//dotnet add package Microsoft.OpenApi --version 1.6.22
-//dotnet clean
-//dotnet build
-//dotnet run --launch-profile "https"
-
 var builder = WebApplication.CreateBuilder(args);
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+// 1. Register services for a Web API (No HTML Views)
+builder.Services.AddControllers(); 
+
+// Configure OpenAPI (Swagger replacement in .NET 10)
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -22,6 +16,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// 2. Map the Controller endpoints (Crucial for WelcomeController to work)
+app.MapControllers(); 
+
+// 3. Keep the Minimal API example (Optional)
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -40,9 +38,10 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
-app.UseRouting();
+
 app.Run();
 
+// Record definitions typically sit at the bottom of the file
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
