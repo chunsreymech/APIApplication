@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ប្រព័ន្ធគ្រប់គ្រងព័ត៌មានសិស្ស</title>
+    <style>
+        /* --- ការរចនា (CSS Design) --- */
+        :root {
+            --primary-color: #0078D4; /* ពណ៌ខៀវបែប ASP.NET */
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif, 'Khmer OS Siemreap';
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        input[type="number"] {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+            width: 200px;
+        }
+        input[type="number"]:focus {
+            border-color: var(--primary-color);
+        }
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button:hover {
+            background-color: #005a9e;
+        }
+        .btn-secondary {
+            background-color: #28a745;
+        }
+        .btn-secondary:hover {
+            background-color: #218838;
+        }
+        #message {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #d9534f; /* ពណ៌ក្រហមសម្រាប់ Error */
+            min-height: 24px;
+        }
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .student-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--primary-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .student-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+        }
+        .student-card h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .student-card p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #e1f0fa;
+            color: var(--primary-color);
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .icon {
+            margin-right: 8px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🎓 ប្រព័ន្ធគ្រប់គ្រងព័ត៌មានសិស្ស</h1>
+        
+        <div class="controls">
+            <button class="btn-secondary" onclick="fetchAllStudents()">📋 បង្ហាញសិស្សទាំងអស់</button>
+            <input type="number" id="studentIdInput" placeholder="វាយបញ្ចូល ID សិស្ស..." min="1">
+            <button onclick="fetchStudentById()">🔍 ស្វែងរក</button>
+        </div>
+
+        <div id="message"></div>
+
+        <div id="studentContainer" class="student-grid">
+            </div>
+    </div>
+
+    <script>
+        // --- កូដ JavaScript ---
+        
+        // ចំណាំ៖ សូមផ្លាស់ប្តូរ Port (ឧ. 7001) ឲ្យត្រូវទៅនឹង Port ដែល API របស់អ្នកកំពុងដំណើរការ
+        const API_URL = 'http://localhost:5079/api/student'; 
+        
+        const studentContainer = document.getElementById('studentContainer');
+        const messageBox = document.getElementById('message');
+
+        // ១. អនុគមន៍សម្រាប់ទាញយកសិស្សទាំងអស់ (GetAll)
+        async function fetchAllStudents() {
+            clearMessage();
+            studentContainer.innerHTML = '<p style="text-align:center; width:100%;">កំពុងផ្ទុកទិន្នន័យ...</p>';
+            
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "មានបញ្ហាក្នុងការទាញយកទិន្នន័យ");
+                }
+                const students = await response.json();
+                renderStudents(students);
+            } catch (error) {
+                showMessage(error.message);
+                studentContainer.innerHTML = '';
+            }
+        }
+
+        // ២. អនុគមន៍សម្រាប់ទាញយកសិស្សតាម ID (GetById)
+        async function fetchStudentById() {
+            const id = document.getElementById('studentIdInput').value;
+            if (!id) {
+                showMessage("សូមបញ្ចូល ID សិស្សមុននឹងស្វែងរក!");
+                return;
+            }
+
+            clearMessage();
+            studentContainer.innerHTML = '<p style="text-align:center; width:100%;">កំពុងស្វែងរក...</p>';
+
+            try {
+                const response = await fetch(`${API_URL}/${id}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || `រកមិនឃើញសិស្សដែលមាន ID = ${id}`);
+                }
+                const student = await response.json();
+                renderStudents([student]); // ដាក់ចូលក្នុង Array ដើម្បីប្រើ Function តែមួយ
+            } catch (error) {
+                showMessage(error.message);
+                studentContainer.innerHTML = '';
+            }
+        }
+
+        // ៣. អនុគមន៍សម្រាប់បង្ហាញទិន្នន័យនៅលើវេបសាយ (UI Render)
+        function renderStudents(students) {
+            studentContainer.innerHTML = ''; // លុបទិន្នន័យចាស់ចោលសិន
+            
+            if (students.length === 0) {
+                showMessage("មិនមានសិស្សនៅក្នុងបញ្ជីទេ");
+                return;
+            }
+
+            students.forEach(student => {
+                // ទាញយកថ្ងៃខែឆ្នាំកំណើតមកបង្ហាញជាទម្រង់ងាយមើល
+                const dob = new Date(student.dob).toLocaleDateString('km-KH');
+
+                const card = document.createElement('div');
+                card.className = 'student-card';
+                card.innerHTML = `
+                    <h3>
+                        ${student.name}
+                        <span class="badge">ID: ${student.id}</span>
+                    </h3>
+                    <p><span class="icon">📚</span> <b>មុខជំនាញ:</b> ${student.major}</p>
+                    <p><span class="icon">🎂</span> <b>ថ្ងៃខែឆ្នាំកំណើត:</b> ${dob}</p>
+                    <p><span class="icon">📧</span> <b>អ៊ីមែល:</b> ${student.email}</p>
+                    <p><span class="icon">✈️</span> <b>តេឡេក្រាម:</b> ${student.telegram}</p>
+                `;
+                studentContainer.appendChild(card);
+            });
+        }
+
+        // អនុគមន៍សម្រាប់បង្ហាញសារបញ្ហា (Error messages)
+        function showMessage(msg) {
+            messageBox.innerText = msg;
+        }
+
+        function clearMessage() {
+            messageBox.innerText = '';
+        }
+    </script>
+</body>
+</html>
