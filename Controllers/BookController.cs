@@ -67,6 +67,7 @@ namespace APIApplication.Controllers
         }
 
 
+
         [HttpDelete("{id}")]
         public IActionResult DeleteBook(int id)
         {
@@ -80,5 +81,4 @@ namespace APIApplication.Controllers
             return Ok(book);
         }
     }
-
 }
