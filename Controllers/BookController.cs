@@ -17,7 +17,7 @@ namespace APIApplication.Controllers
             new Book().BindBook(2, "To Kill a Mockingbird", "Harper Lee", new DateTime(1960, 7, 11)),
             new Book().BindBook(3, "1984", "George Orwell", new DateTime(1949, 6, 8)),
             new Book().BindBook(4, "Pride and Prejudice", "Jane Austen", new DateTime(1813, 1, 28)),
-        };            
+        };
 
         [HttpGet]
         public IActionResult GetBooks()
@@ -65,19 +65,20 @@ namespace APIApplication.Controllers
             books.Add(book);
             return Ok(book);
         }
-    }
 
-    [HttpDelete("{id}")]
-    public IActionResult DeleteBook(int id)
-    {
-        var books = _books();
-        var book = books.FirstOrDefault(b => b.BookId == id);
-        if (book == null)
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteBook(int id)
         {
-            return NotFound();
+            var books = _books();
+            var book = books.FirstOrDefault(b => b.BookId == id);
+            if (book == null)
+            {
+                return NotFound();
+            }
+            books.Remove(book);
+            return Ok(book);
         }
-        books.Remove(book);
-        return Ok(book);
     }
 
 }
